@@ -1,0 +1,118 @@
+#extend("layout"):
+    #export("sidebar"):
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h3>Navigation</h3>
+            </div>
+            <ul class="language-list">
+                <li>
+                    <a href="/" class="language-item">
+                        <span class="language-name">← All Snippets</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="sidebar-header" style="margin-top: var(--spacing-lg);">
+                <h3>This Snippet</h3>
+            </div>
+            <ul class="language-list">
+                <li>
+                    <span class="language-item">
+                        <span class="language-name">#(snippet.language)</span>
+                    </span>
+                </li>
+            </ul>
+        </aside>
+    #endexport
+    #export("content"):
+        <div class="snippet-detail">
+            <div class="snippet-detail-header">
+                <div>
+                    <h2>#(snippet.title)</h2>
+                    #if(snippet.description):
+                        <p class="snippet-description">#(snippet.description)</p>
+                    #endif
+                </div>
+                <div class="snippet-actions">
+                    <button class="btn btn-primary" onclick="generateFreeze('#(snippet.id)')">🖼️ Generate Image</button>
+                    <a href="/" class="btn">← Back</a>
+                </div>
+            </div>
+            
+            <div class="snippet-meta">
+                <span class="meta-label">Language:</span>
+                <span class="language-badge">#(snippet.language)</span>
+                #if(count(snippet.tags) > 0):
+                    <span class="meta-separator">|</span>
+                    <span class="meta-label">Tags:</span>
+                    #for(tag in snippet.tags):
+                        <span class="tag">#(tag)</span>
+                    #endfor
+                #endif
+                #if(snippet.isFavorite):
+                    <span class="favorite" title="Favorite">⭐</span>
+                #endif
+            </div>
+            
+            <div class="code-container">
+                <pre><code class="language-#(snippet.language)">#(snippet.code)</code></pre>
+            </div>
+            
+            <div class="snippet-footer">
+                <small>
+                    Created: #(snippet.createdAt)
+                    #if(snippet.updatedAt):
+                        | Updated: #(snippet.updatedAt)
+                    #endif
+                </small>
+            </div>
+        </div>
+
+        <!-- Freeze Settings Modal -->
+        <div id="freezeModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="hideFreezeModal()">&times;</span>
+                <h2>Freeze Settings</h2>
+                <form onsubmit="submitFreeze(event)">
+                    <div class="form-group">
+                        <label>Theme</label>
+                        <select id="freezeTheme">
+                            <option value="catppuccin-mocha" selected>Catppuccin Mocha</option>
+                            <option value="catppuccin-latte">Catppuccin Latte</option>
+                            <option value="dracula">Dracula</option>
+                            <option value="nord">Nord</option>
+                            <option value="tokyonight">Tokyo Night</option>
+                            <option value="monokai">Monokai</option>
+                            <option value="solarized-dark">Solarized Dark</option>
+                            <option value="solarized-light">Solarized Light</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div>
+                            <label>Padding</label>
+                            <input type="text" id="freezePadding" value="20,40" placeholder="e.g. 20,40">
+                        </div>
+                        <div>
+                            <label>Margin</label>
+                            <input type="text" id="freezeMargin" value="0" placeholder="e.g. 0">
+                        </div>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="freezeWindow" checked> Window Controls
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="freezeBackground" checked> Background Fill
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="freezeLineNumbers"> Line Numbers
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 20px;">📸 Generate Image</button>
+                </form>
+            </div>
+        </div>
+    #endexport
+#endextend

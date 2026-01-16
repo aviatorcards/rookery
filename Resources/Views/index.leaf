@@ -1,0 +1,147 @@
+#extend("layout"):
+    #export("sidebar"):
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h3>Languages</h3>
+            </div>
+            <ul class="language-list">
+                <li>
+                    <button type="button" class="language-item active" data-language="all" onclick="handleLanguageClick(this, null)">
+                        <span class="language-name">All</span>
+                        <span class="language-count">#(count(snippets))</span>
+                    </button>
+                </li>
+                #for(lang in languages):
+                    <li>
+                        <button type="button" class="language-item" data-language="#(lang.name)" onclick="handleLanguageClick(this, '#(lang.name)')">
+                            <span class="language-name">#(lang.name)</span>
+                            <span class="language-count">#(lang.count)</span>
+                        </button>
+                    </li>
+                #endfor
+            </ul>
+        </aside>
+    #endexport
+    #export("content"):
+        <div class="header-actions">
+            <h2>All Snippets</h2>
+            <button class="btn btn-primary" onclick="showCreateModal()">+ New Snippet</button>
+        </div>
+        
+        <div class="search-bar" style="display: flex; gap: 10px;">
+            <input type="text" id="searchInput" placeholder="Search snippets..." onkeyup="searchSnippets()" style="flex: 1;">
+            <select onchange="sortSnippets(this.value)" style="padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--surface-color); color: var(--text-primary);">
+                <option value="date">Sort by Date</option>
+                <option value="title">Sort by Title</option>
+                <option value="language">Sort by Language</option>
+            </select>
+        </div>
+        
+        <div class="snippets-grid" id="snippetsGrid">
+            #if(count(snippets) > 0):
+                #for(snippet in snippets):
+                    <div class="snippet-card" data-tags="#(snippet.tags)" data-language="#(snippet.language)">
+                        <div class="snippet-header">
+                            <h3>#(snippet.title)</h3>
+                            #if(snippet.isFavorite):
+                                <span class="favorite">⭐</span>
+                            #endif
+                        </div>
+                        
+                        #if(snippet.description):
+                            <p class="snippet-description">#(snippet.description)</p>
+                        #endif
+                        
+                        <div class="snippet-meta">
+                            <span class="language-badge">#(snippet.language)</span>
+                            #if(count(snippet.tags) > 0):
+                                #for(tag in snippet.tags):
+                                    <span class="tag">#(tag)</span>
+                                #endfor
+                            #endif
+                        </div>
+                        
+                        <div class="snippet-actions">
+                            <a href="/snippets/#(snippet.id)" class="btn btn-small">View</a>
+                            <button class="btn btn-small" onclick="generateFreeze('#(snippet.id)')">🖼️ Freeze</button>
+                            <button class="btn btn-small btn-danger" onclick="deleteSnippet('#(snippet.id)')">Delete</button>
+                        </div>
+                    </div>
+                #endfor
+            #else:
+                <div class="empty-state">
+                    <h3>No snippets yet</h3>
+                    <p>Create your first code snippet to start building your colony!</p>
+                    <button class="btn btn-primary" onclick="showCreateModal()">+ Create First Snippet</button>
+                </div>
+            #endif
+        </div>
+        
+        <!-- Create Snippet Modal -->
+        <div id="createModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="hideCreateModal()">&times;</span>
+                <h2>New Snippet</h2>
+                <form id="createForm" onsubmit="createSnippet(event)">
+                    <input type="text" id="title" placeholder="Title" required>
+                    <input type="text" id="language" placeholder="Language (e.g., swift, python)" required>
+                    <textarea id="code" placeholder="Paste your code here..." rows="10" required></textarea>
+                    <textarea id="description" placeholder="Description (optional)" rows="2"></textarea>
+                    <input type="text" id="tags" placeholder="Tags (comma-separated)">
+                    <label>
+                        <input type="checkbox" id="isFavorite"> Mark as favorite
+                    </label>
+                    <button type="submit" class="btn btn-primary">Create Snippet</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Freeze Settings Modal -->
+        <div id="freezeModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="hideFreezeModal()">&times;</span>
+                <h2>Freeze Settings</h2>
+                <form onsubmit="submitFreeze(event)">
+                    <div class="form-group">
+                        <label>Theme</label>
+                        <select id="freezeTheme">
+                            <option value="catppuccin-mocha" selected>Catppuccin Mocha</option>
+                            <option value="catppuccin-latte">Catppuccin Latte</option>
+                            <option value="dracula">Dracula</option>
+                            <option value="nord">Nord</option>
+                            <option value="tokyonight">Tokyo Night</option>
+                            <option value="monokai">Monokai</option>
+                            <option value="solarized-dark">Solarized Dark</option>
+                            <option value="solarized-light">Solarized Light</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div>
+                            <label>Padding</label>
+                            <input type="text" id="freezePadding" value="20,40" placeholder="e.g. 20,40">
+                        </div>
+                        <div>
+                            <label>Margin</label>
+                            <input type="text" id="freezeMargin" value="0" placeholder="e.g. 0">
+                        </div>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="freezeWindow" checked> Window Controls
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="freezeBackground" checked> Background Fill
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="freezeLineNumbers"> Line Numbers
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 20px;">📸 Generate Image</button>
+                </form>
+            </div>
+        </div>
+    #endexport
+#endextend

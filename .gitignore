@@ -1,0 +1,25 @@
+# Build artifacts
+.build/
+.swiftpm/
+DerivedData/
+
+# Xcode
+*.xcodeproj
+*.xcworkspace
+xcuserdata/
+
+# Database
+rookery.sqlite
+rookery.sqlite-shm
+rookery.sqlite-wal
+
+# IDE/Editor
+.DS_Store
+.claude/
+.vscode/
+.gemini/
+*.swp
+*~
+
+# Package Manager
+Package.resolved

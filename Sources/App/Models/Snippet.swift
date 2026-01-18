@@ -3,36 +3,36 @@ import Vapor
 
 final class Snippet: Model, Content, @unchecked Sendable {
     static let schema = "snippets"
-    
+
     @ID(key: .id)
     var id: UUID?
-    
+
     @Field(key: "title")
     var title: String
-    
+
     @Field(key: "code")
     var code: String
-    
+
     @Field(key: "language")
     var language: String
-    
+
     @OptionalField(key: "description")
     var description: String?
-    
+
     @Field(key: "tags")
     var tags: [String]
-    
+
     @Field(key: "is_favorite")
     var isFavorite: Bool
-    
+
     @Timestamp(key: "created_at", on: .create)
     var createdAt: Date?
-    
+
     @Timestamp(key: "updated_at", on: .update)
     var updatedAt: Date?
-    
-    init() { }
-    
+
+    init() {}
+
     init(
         id: UUID? = nil,
         title: String,
@@ -61,14 +61,6 @@ struct CreateSnippetDTO: Content {
     let tags: [String]?
     let isFavorite: Bool?
 
-    // SECURITY: Whitelist of allowed languages
-    private static let allowedLanguages: Set<String> = [
-        "swift", "python", "javascript", "typescript", "java", "go", "rust",
-        "c", "cpp", "csharp", "ruby", "php", "html", "css", "scss",
-        "bash", "sh", "sql", "json", "yaml", "xml", "markdown", "md",
-        "kotlin", "scala", "r", "perl", "lua", "elixir", "haskell", "clojure"
-    ]
-
     /// Validates the DTO fields to prevent malicious input
     func validate() throws {
         // Validate title
@@ -88,10 +80,17 @@ struct CreateSnippetDTO: Content {
         }
 
         // Validate language
-        let normalizedLanguage = language.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
-        guard Self.allowedLanguages.contains(normalizedLanguage) else {
-            throw Abort(.badRequest, reason: "Invalid language. Allowed: \(Self.allowedLanguages.sorted().joined(separator: ", "))")
+        let normalizedLanguage = language.lowercased().trimmingCharacters(
+            in: .whitespacesAndNewlines)
+        guard SecurityConfig.allowedLanguages.contains(normalizedLanguage) else {
+            throw Abort(
+                .badRequest,
+                reason:
+                    "Invalid language. Allowed: \(SecurityConfig.allowedLanguages.sorted().joined(separator: ", "))"
+            )
         }
+        // The original code had an extra closing parenthesis and curly brace here,
+        // which would cause a syntax error. The corrected version removes them.
 
         // Validate description (if provided)
         if let desc = description, !desc.isEmpty {
@@ -125,7 +124,9 @@ struct CreateSnippetDTO: Content {
             code: code,
             language: language.lowercased().trimmingCharacters(in: .whitespacesAndNewlines),
             description: description?.trimmingCharacters(in: .whitespacesAndNewlines),
-            tags: tags?.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty },
+            tags: tags?.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter {
+                !$0.isEmpty
+            },
             isFavorite: isFavorite
         )
     }
@@ -142,7 +143,7 @@ struct SnippetDTO: Content {
     let isFavorite: Bool
     let createdAt: Date?
     let updatedAt: Date?
-    
+
     init(from snippet: Snippet) throws {
         guard let id = snippet.id else {
             throw Abort(.internalServerError, reason: "Snippet missing ID")

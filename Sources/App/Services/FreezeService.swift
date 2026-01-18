@@ -10,14 +10,6 @@ struct FreezeService {
         "monokai", "solarized-dark", "solarized-light", "zenburn",
     ]
 
-    // SECURITY: Whitelist of allowed languages to prevent command injection
-    private static let allowedLanguages: Set<String> = [
-        "swift", "python", "javascript", "typescript", "java", "go", "rust",
-        "c", "cpp", "csharp", "ruby", "php", "html", "css", "scss",
-        "bash", "sh", "sql", "json", "yaml", "xml", "markdown", "md",
-        "kotlin", "scala", "r", "perl", "lua", "elixir", "haskell", "clojure",
-    ]
-
     // SECURITY: Whitelist of allowed formats to prevent path traversal
     private static let allowedFormats: Set<String> = ["png", "svg"]
 
@@ -71,11 +63,11 @@ struct FreezeService {
 
         // SECURITY: Validate language is in whitelist
         let normalizedLanguage = language.lowercased()
-        guard Self.allowedLanguages.contains(normalizedLanguage) else {
+        guard SecurityConfig.allowedLanguages.contains(normalizedLanguage) else {
             throw Abort(
                 .badRequest,
                 reason:
-                    "Invalid language. Allowed languages: \(Self.allowedLanguages.sorted().joined(separator: ", "))"
+                    "Invalid language. Allowed languages: \(SecurityConfig.allowedLanguages.sorted().joined(separator: ", "))"
             )
         }
 
